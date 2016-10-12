@@ -90,11 +90,40 @@ public class Node {
 	}
 	   
 	public static void main(String [] args) {
-		if (args.length != 2) return;
 
+		if (args.length != 1) return;
+	   
 		files = new SynchronizedMap<String, FileNodeState>();
 		connectedNodes = new SynchronizedMap<String, Connection>();
+
+		this.N = Integer.parseInt(args[0]);
 		
-		readTree(args[0], args[1]);
+		c = system.console();
+		
+		while (true) {
+			String line = c.readline();
+			if (line.startsWith("activate")) {
+				String[] parts = line.split(" ");
+				String file1 = parts[1];
+				String file2 = parts[2];
+				readTree(file1, file2);
+			} else if (line.startsWith("create")) {
+				String[] parts = line.split(" ");
+				
+			} else if (line.startsWith("delete")) {
+				String[] parts = line.split(" ");
+				
+			} else if (line.startsWith("read")) {
+				String[] parts = line.split(" ");
+				
+			} else if (line.startsWith("append")) {
+				String[] parts = line.split(" ");
+				
+			} else if (line.equals("close")) {
+				break;
+			} else {
+				System.out.println("Unknown Msg: " + line);
+			}
+		}
 	}
 }
