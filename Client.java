@@ -12,8 +12,8 @@ public class Client extends Thread {
 	private List<Boolean> tokensInUse;
 	private Map<String, List<String>> files;
 
-	public Client(String argument, List<String> tokens, List<Boolean> tokensInUse, Map<String, List<String>> files) throws IOException {
-		int port = Integer.parseInt(argument);
+	public Client(int port, List<String> tokens, List<Boolean> tokensInUse, Map<String, List<String>> files) throws IOException {
+		//int port = Integer.parseInt(argument);
 		serverSocket = new ServerSocket(port);
       	//serverSocket.setSoTimeout(10000);
 		this.tokens = tokens;

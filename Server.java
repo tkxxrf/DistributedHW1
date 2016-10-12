@@ -13,14 +13,11 @@ public class Server extends Thread {
 	private List<Boolean> tokensInUse;
 	private Map<String, List<String>> files;
    
-	public Server(String argument, List<String> tokens, List<Boolean> tokensInUse, Map<String, List<String>> files) throws IOException {
+	public Server(String server, int port, List<String> tokens, List<Boolean> tokensInUse, Map<String, List<String>> files) throws IOException {
 		this.tokens = tokens;
 		this.tokensInUse = tokensInUse;
 		this.files = files;
-		
-		String[] arguments = argument.split(":");
-		String server = arguments[0];
-		int port = Integer.parseInt(arguments[1]);
+
 		try {
 			client = new Socket(server, port);
 		} catch (UnknownHostException e) {
