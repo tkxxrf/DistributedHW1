@@ -7,24 +7,19 @@ import java.util.List;
 import java.util.Map;
 import java.io.*;
 
-public class Server {
-	private Socket client;
+public class OutgoingConnection {
+	private String server;
+	private int port;
    
-	public Server(String server, int port) throws IOException {
-
-		try {
-			client = new Socket(server, port);
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public OutgoingConnection(String server, int port) throws IOException {
+		this.server = server;
+		this.port = port;
 	}
 
 	public synchronized void send(String message) {
 		try {
+
+			Socket client = new Socket(server, port);
 			System.out.println("Just connected to " + client.getRemoteSocketAddress());
 			OutputStream outToServer = client.getOutputStream();
 			DataOutputStream out = new DataOutputStream(outToServer);
@@ -32,6 +27,9 @@ public class Server {
 			out.writeUTF(message);
 			client.close();
 		} catch(IOException e) {
+			e.printStackTrace();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

@@ -44,7 +44,7 @@ public class IncomingConnection implements Runnable {
 					synchronized(state){
 						if((int ref = state.requests.poll()) != null){
 							if(ref == parent.N){
-								state.holder = parent.name;
+								state.holder = parent.N;
 								state.asked = false;
 								state.using = true;
 								parent.actOn(message[1], file);

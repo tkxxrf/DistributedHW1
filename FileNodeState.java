@@ -8,12 +8,13 @@ public class FileNodeState {
 	public boolean asked;
 	public String filename;
 	public boolean using;
-
+	public String file;
 	public FileNodeState(String name, String from){
 		filename = name;
 		holder = from;
 		asked = false;
 		requests = new LinkedList<String>();
 		using = false;
+		file = "";
 	}
 }

@@ -8,14 +8,15 @@ import java.util.Map;
 
 public class Node {
 
-	private static Map<Integer, Pair<OutgoingConnection, IncomingConnection> > connectedNodes;
-	private static Map<Integer, FileNodeState> files;
+	public Map<Integer, Pair<OutgoingConnection, IncomingConnection> > connectedNodes;
+	public Map<String, FileNodeState> files;
+	public Map<String, Queue<String>> operations;
 	
-	private List<String> ips;
-	private int N;
+	private static List<String> ips;
+	public int N;
 	
 
-	private void createConnection(int other) {
+	private static createConnection(int other) {
 		String ip = ips[other-1];
 		int port = N*100+other;
 		OutgoingConnection out;
@@ -34,7 +35,29 @@ public class Node {
 		} 
 		connectedNodes.put(N, Pair.create(out, in));
 	}
-	
+	public void actOn(String filename, String file){
+		String op = operations.get(filename).poll();
+		if(!op) return;
+
+		if(op.startsWith("read")){
+			System.out.println("reading " + filename);
+			System.out.println(file);
+			files.get(filename).file = file;
+		}
+		if(op.startsWith("append")){
+			System.out.println("appending to " + filename);
+			files.get(filename).file = file + op.substring(String("append").length + filename.length +2);
+		}
+		if(op.startsWith("delete")){
+			files.remove(filename);
+			operations.remove(filename);
+			synchronized(parent.connectedNodes){
+				for(Map.Entry<Integer, Pair<OutgoingConnection, IncomingConnection>> entry : parent.connectedNodes.entrySet()){
+					entry.first.send("DELETE " + filename);
+				}
+			}
+		}
+	}	
 	private void readTree(String treeFileName, String ipFileName) {
 		String sCurrentLine1;
 		br1 = new BufferedReader(new FileReader(treeFileName));
@@ -68,7 +91,7 @@ public class Node {
 	   
 	public static void main(String [] args) {
 		if (args.length != 2) return;
-	   
+
 		files = new SynchronizedMap<String, FileNodeState>();
 		connectedNodes = new SynchronizedMap<String, Connection>();
 		
