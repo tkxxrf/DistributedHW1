@@ -1,7 +1,7 @@
 Messages:
 
 
-TOKEN filename length file
+TOKEN filename file
 
 CREATE filename
 

@@ -6,30 +6,17 @@ import java.util.List;
 import java.util.Map;
 import java.io.*;
 
-public class Connection implements Runnable {
+public class IncomingConnection implements Runnable {
 	private static ServerSocket incoming;
-	private static ServerSocket outgoing;
-	private Map<String, FileNodeState> files;
-	private Map<String, Connection> connectedNodes;
 	private Node parent;
-	private String connectedTo;
+	private int connectedTo;
 
-	public Connection(String node, String in, String out, Map<String, FileNodeState> files, Map<String, Connection> connectedNodes, Node parent) throws IOException {
-		int inport = Integer.parseInt(in);
-		incoming = new ServerSocket(port);
+	public IncomingConnection(int inport, Node parent, int to) throws IOException {
+		incoming = new ServerSocket(inport);
 
-		int outport = Integer.parseInt(out);
-		outgoing = new ServerSocket(outport);
-
-      	//serverSocket.setSoTimeout(10000);
-		this.files = files;
-		this.connectedNodes = connectedNodes;
 		this.parent = parent;
-		this.connectedTo = node;
-	}
-
-	public synchronized send(){
-		
+      	//serverSocket.setSoTimeout(10000);
+		this.connectedTo = to;
 	}
 	
 	public void run() {
@@ -53,31 +40,45 @@ public class Connection implements Runnable {
 						}
 					}
 					String file = builder.toString();
-					FileNodeState state = files.get(message[1]);
+					FileNodeState state = parent.files.get(message[1]);
 					synchronized(state){
-						if((String ref = state.requests.poll()) != null){
-							if(ref == parent.name){
+						if((int ref = state.requests.poll()) != null){
+							if(ref == parent.N){
 								state.holder = parent.name;
 								state.asked = false;
 								state.using = true;
 								parent.actOn(message[1], file);
 								state.using = false;
 							}else{
-								connectedNodes.get(ref).send("TOKEN " + message[1] + " " +file);
+								parent.connectedNodes.get(ref).first.send("TOKEN " + message[1] + " " +file);
 								state.holder = ref;
 								if(!state.requests.empty()){
-									connectedNodes.get(state.holder).send("REQUEST " + message[1]);
+									parent.connectedNodes.get(state.holder).first.send("REQUEST " + message[1]);
 								}
 							}
 						}
 					}
 
 				}else if(mesage[0].equals("CREATE")){
-					files.put(message[1], new FileNodeState(message[1], message[2]));
+					parent.files.put(message[1], new FileNodeState(message[1], this.connectedTo));
+					synchronized(parent.connectedNodes){
+					for(Map.Entry<Integer, Pair<OutgoingConnection, IncomingConnection>> entry : parent.connectedNodes.entrySet()){
+						if(entry.getKey() != this.connectedTo){
+							entry.first.send("CREATE " + message[1]);
+						}
+					}
+					}
 				}else if(mesage[0].equals("DELETE")){
-					files.remove(message[1]);
+					parent.files.remove(message[1]);
+					synchronized(parent.connectedNodes){
+					for(Map.Entry<Integer, Pair<OutgoingConnection, IncomingConnection>> entry : parent.connectedNodes.entrySet()){
+						if(entry.getKey() != this.connectedTo){
+							entry.first.send("DELETE " + message[1]);
+						}
+					}
+					}
 				}else if(mesage[0].equals("REQUEST")){
-					FileNodeState state = files.get(message[1]);
+					FileNodeState state = parent.files.get(message[1]);
 					synchronized(state){
 						if(state.holder == parent.name){
 							if(!state.using){
@@ -90,7 +91,7 @@ public class Connection implements Runnable {
 						}else{
 							state.requests.add(this.connectedTo);
 							if(!state.asked){
-								connectedNodes.get(state.holder).send("REQUEST " + message[1]);
+								parent.connectedNodes.get(state.holder).first.send("REQUEST " + message[1]);
 								state.asked = true;
 							}
 						}
