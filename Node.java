@@ -3,6 +3,7 @@ package project1;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -76,8 +77,10 @@ public class Node {
 	}	
 	
 	private void readTree(String treeFileName, String ipFileName) throws IOException {
+		ips = new ArrayList<String>();
+		
 		String sCurrentLine1;
-		BufferedReader br1 = new BufferedReader(new FileReader(treeFileName));
+		BufferedReader br1 = new BufferedReader(new FileReader(ipFileName));
 		while ((sCurrentLine1 = br1.readLine()) != null) {
 			ips.add(sCurrentLine1);
 			System.out.println(sCurrentLine1);
@@ -88,8 +91,8 @@ public class Node {
 		String sCurrentLine2;
 		BufferedReader br2 = new BufferedReader(new FileReader(treeFileName));
 		while ((sCurrentLine2 = br2.readLine()) != null) {
-			sCurrentLine2.replace("(", "");
-			sCurrentLine2.replace(")", "");
+			sCurrentLine2 = sCurrentLine2.replace("(", "");
+			sCurrentLine2 = sCurrentLine2.replace(")", "");
 			String[] parts = sCurrentLine2.split(",");
 			System.out.println(parts[0] + " " + parts[1]);
 			if (Integer.parseInt(parts[0]) == N) {
@@ -110,6 +113,7 @@ public class Node {
 		Scanner sc = new Scanner(System.in);
 		
 		while (true) {
+			System.out.println("Please Enter a Command");
 			String line = sc.nextLine();
 			if (line.startsWith("activate")) {
 				String[] parts = line.split(" ");
@@ -119,6 +123,7 @@ public class Node {
 			} else if (line.startsWith("create")) {
 				String[] parts = line.split(" ");
 				String fileName = parts[1];
+				System.out.println("Creating File: " + fileName);
 				if (files.get(fileName) != null) {
 					System.out.println("Error: File " + fileName + " Already Exists");
 					continue;
@@ -148,7 +153,9 @@ public class Node {
 				if (files.get(fileName) != null) {
 					FileNodeState file = files.get(fileName);
 					int holder = file.holder;
-					connectedNodes.get(holder).first.send("REQUEST " + fileName);
+					if (holder != N) {
+						connectedNodes.get(holder).first.send("REQUEST " + fileName);
+					}
 					operations.get(fileName).add("read");
 					actOn(fileName, files.get(fileName).file);
 				} else {
@@ -161,7 +168,9 @@ public class Node {
 				if (files.get(fileName) != null) {
 					FileNodeState file = files.get(fileName);
 					int holder = file.holder;
-					connectedNodes.get(holder).first.send("REQUEST " + fileName);
+					if (holder != N) {
+						connectedNodes.get(holder).first.send("REQUEST " + fileName);
+					}
 					StringBuilder builder = new StringBuilder();
 					for(int i = 2; i < parts.length; ++i){
 						builder.append(parts[i]);
@@ -170,13 +179,15 @@ public class Node {
 						}
 					}
 					String file1 = builder.toString();
-					operations.get(fileName).add("append " + file1);
-					actOn(fileName, file1);
+					System.out.println("appending: " + file1 + " to file " + fileName);
+					operations.get(fileName).add("append " + fileName + " " + file1 + "\n");
+					actOn(fileName, files.get(fileName).file);
 				} else {
 					System.out.println("Error: No File Named: " + fileName);
 					continue;
 				}
 			} else if (line.equals("close")) {
+				System.out.println("Closing Program");
 				break;
 			} else {
 				System.out.println("Unknown Msg: " + line);
