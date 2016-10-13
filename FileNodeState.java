@@ -3,17 +3,17 @@ package project1;
 import java.util.*;
 
 public class FileNodeState {
-	public String holder;
-	public Queue<String> requests;
+	public int holder;
+	public Queue<int> requests;
 	public boolean asked;
 	public String filename;
 	public boolean using;
 	public String file;
-	public FileNodeState(String name, String from){
+	public FileNodeState(String name, int from){
 		filename = name;
 		holder = from;
 		asked = false;
-		requests = new LinkedList<String>();
+		requests = new LinkedList<int>();
 		using = false;
 		file = "";
 	}

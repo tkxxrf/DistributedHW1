@@ -98,7 +98,7 @@ public class IncomingConnection implements Runnable {
 
 				}
 
-				server.close();
+				//server.close();
 			}catch(SocketTimeoutException s) {
 				System.out.println("Socket timed out!");
 				break;

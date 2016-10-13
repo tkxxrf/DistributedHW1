@@ -1,6 +1,7 @@
 package project1;
 
 import java.io.IOException;
+import java.io.Console;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,36 +29,39 @@ public class Node {
 		}
 		int incomingport = other*100+N;
 		try {
-			in = new IncomingConnection(incomingport, connectedNodes, files);
+			in = new IncomingConnection(incomingport, N, other);
 			(new Thread(in)).start();
 		} catch(IOException e) {
 		   e.printStackTrace();
 		} 
 		connectedNodes.put(N, Pair.create(out, in));
 	}
-	public void actOn(String filename, String file){
+	
+	public void actOn(String filename){
 		String op = operations.get(filename).poll();
 		if(!op) return;
 
 		if(op.startsWith("read")){
 			System.out.println("reading " + filename);
+			String file = files.get(filename).file;
 			System.out.println(file);
-			files.get(filename).file = file;
 		}
 		if(op.startsWith("append")){
 			System.out.println("appending to " + filename);
+			String file = files.get(filename).file;
 			files.get(filename).file = file + op.substring(String("append").length + filename.length +2);
 		}
 		if(op.startsWith("delete")){
 			files.remove(filename);
 			operations.remove(filename);
-			synchronized(parent.connectedNodes){
-				for(Map.Entry<Integer, Pair<OutgoingConnection, IncomingConnection>> entry : parent.connectedNodes.entrySet()){
+			synchronized(connectedNodes){
+				for(Map.Entry<Integer, Pair<OutgoingConnection, IncomingConnection>> entry : connectedNodes.entrySet()){
 					entry.first.send("DELETE " + filename);
 				}
 			}
 		}
 	}	
+	
 	private void readTree(String treeFileName, String ipFileName) {
 		String sCurrentLine1;
 		br1 = new BufferedReader(new FileReader(treeFileName));
@@ -90,11 +94,11 @@ public class Node {
 	}
 	   
 	public static void main(String [] args) {
-
 		if (args.length != 1) return;
 	   
 		files = new SynchronizedMap<String, FileNodeState>();
 		connectedNodes = new SynchronizedMap<String, Connection>();
+		operations = new SynchronizedMap<String, Queue<String>>();
 
 		this.N = Integer.parseInt(args[0]);
 		
@@ -109,16 +113,63 @@ public class Node {
 				readTree(file1, file2);
 			} else if (line.startsWith("create")) {
 				String[] parts = line.split(" ");
-				
+				String fileName = parts[1];
+				if (files.get(fileName) != null) {
+					System.out.println("Error: File " + fileName + " Already Exists");
+					continue;
+				} else {
+					FileNodeState newFile = new FileNodeState(fileName, N);
+					files.put(fileName, newFile);
+					Queue<String> queue = new LinkedList<String>();
+					operations.put(fileName, queue);
+					for(Map.Entry<Integer, Pair<OutgoingConnection, IncomingConnection>> entry : connectedNodes.entrySet()){
+						entry.first.send("CREATE " + fileName);
+					}
+				}
 			} else if (line.startsWith("delete")) {
 				String[] parts = line.split(" ");
-				
+				String fileName = parts[1];
+				if (files.get(fileName) != null) {
+					operations.get(fileName).put("delete");
+					actOn(fileName);
+				} else {
+					System.out.println("Error: No File Named: " + fileName);
+					continue;
+				}
 			} else if (line.startsWith("read")) {
 				String[] parts = line.split(" ");
-				
+				String fileName = parts[1];
+				if (files.get(fileName) != null) {
+					FileNodeState file = files.get(fileName);
+					int holder = file.holder;
+					connectedNodes.get(holder).first.send("REQUEST " + fileName);
+					operations.get(fileName).put("read");
+					actOn(fileName);
+				} else {
+					System.out.println("Error: No File Named: " + fileName);
+					continue;
+				}
 			} else if (line.startsWith("append")) {
 				String[] parts = line.split(" ");
-				
+				String fileName = parts[1];
+				if (files.get(fileName) != null) {
+					FileNodeState file = files.get(fileName);
+					int holder = file.holder;
+					connectedNodes.get(holder).first.send("REQUEST " + fileName);
+					StringBuilder builder = new StringBuilder();
+					for(int i = 2; i < parts.length; ++i){
+						builder.append(parts[i]);
+						if(i < parts.length-1){
+							builder.append(" ");
+						}
+					}
+					String file = builder.toString();
+					operations.get(fileName).put("append " + file);
+					actOn(fileName);
+				} else {
+					System.out.println("Error: No File Named: " + fileName);
+					continue;
+				}
 			} else if (line.equals("close")) {
 				break;
 			} else {
