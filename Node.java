@@ -3,13 +3,13 @@ package project1;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.Console;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Scanner;
 
 public class Node {
 
@@ -107,10 +107,10 @@ public class Node {
 	}
 	   
 	public void start() throws IOException {
-		Console c = System.console();
+		Scanner sc = new Scanner(System.in);
 		
 		while (true) {
-			String line = c.readLine();
+			String line = sc.nextLine();
 			if (line.startsWith("activate")) {
 				String[] parts = line.split(" ");
 				String file1 = parts[1];
@@ -182,5 +182,6 @@ public class Node {
 				System.out.println("Unknown Msg: " + line);
 			}
 		}
+		sc.close();
 	}
 }
