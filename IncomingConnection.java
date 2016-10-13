@@ -49,11 +49,23 @@ public class IncomingConnection implements Runnable {
 								state.using = true;
 								parent.actOn(message[1], file);
 								state.using = false;
+								if(!state.requests.empty()){
+									int newref = state.requests.poll();
+									parent.connectedNodes.get(ref).first.send("TOKEN " + message[1] + " " +file);
+									state.holder = newref;
+									state.asked = false;
+									
+									if(!state.requests.empty()){
+										parent.connectedNodes.get(state.holder).first.send("REQUEST " + message[1]);
+										asked = true;
+									}
+								}
 							}else{
 								parent.connectedNodes.get(ref).first.send("TOKEN " + message[1] + " " +file);
 								state.holder = ref;
 								if(!state.requests.empty()){
 									parent.connectedNodes.get(state.holder).first.send("REQUEST " + message[1]);
+									asked = true;
 								}
 							}
 						}
