@@ -1,10 +1,6 @@
 package project1;
 
 import java.net.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.io.*;
 
 public class OutgoingConnection {
@@ -27,9 +23,6 @@ public class OutgoingConnection {
 			out.writeUTF(message);
 			client.close();
 		} catch(IOException e) {
-			e.printStackTrace();
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

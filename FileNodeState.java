@@ -4,7 +4,7 @@ import java.util.*;
 
 public class FileNodeState {
 	public int holder;
-	public Queue<int> requests;
+	public Queue<Integer> requests;
 	public boolean asked;
 	public String filename;
 	public boolean using;
@@ -13,7 +13,7 @@ public class FileNodeState {
 		filename = name;
 		holder = from;
 		asked = false;
-		requests = new LinkedList<int>();
+		requests = new LinkedList<Integer>();
 		using = false;
 		file = "";
 	}
