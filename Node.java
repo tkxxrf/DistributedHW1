@@ -13,13 +13,22 @@ import java.util.Queue;
 
 public class Node {
 
-	public Map<Integer, Pair<OutgoingConnection, IncomingConnection> > connectedNodes;
-	public Map<String, FileNodeState> files;
-	public Map<String, Queue<String>> operations;
+	public static Map<Integer, Pair<OutgoingConnection, IncomingConnection> > connectedNodes;
+	public static Map<String, FileNodeState> files;
+	public static Map<String, Queue<String>> operations;
 	
-	private List<String> ips;
-	public Integer N;
+	private static List<String> ips;
+	public static Integer N;
 	
+	public Node(int id) {
+		N = id;
+		Map<String, FileNodeState> m1 = new HashMap<String, FileNodeState>();
+		files = Collections.synchronizedMap(m1);
+		Map<Integer, Pair<OutgoingConnection, IncomingConnection>> m2 = new HashMap<Integer, Pair<OutgoingConnection, IncomingConnection>>();
+		connectedNodes = Collections.synchronizedMap(m2);
+		Map<String, Queue<String>> m3 = new HashMap<String, Queue<String>>();
+		operations = Collections.synchronizedMap(m3);
+	}
 
 	private void createConnection(int other) {
 		String ip = ips.get(other-1);
@@ -97,18 +106,7 @@ public class Node {
 		br2.close();
 	}
 	   
-	public void main(String [] args) throws IOException {
-		if (args.length != 1) return;
-	   
-		Map<String, FileNodeState> m1 = new HashMap<String, FileNodeState>();
-		files = Collections.synchronizedMap(m1);
-		Map<Integer, Pair<OutgoingConnection, IncomingConnection>> m2 = new HashMap<Integer, Pair<OutgoingConnection, IncomingConnection>>();
-		connectedNodes = Collections.synchronizedMap(m2);
-		Map<String, Queue<String>> m3 = new HashMap<String, Queue<String>>();
-		operations = Collections.synchronizedMap(m3);
-
-		N = Integer.parseInt(args[0]);
-		
+	public void start() throws IOException {
 		Console c = System.console();
 		
 		while (true) {
