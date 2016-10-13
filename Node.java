@@ -9,15 +9,15 @@ import java.util.Map;
 
 public class Node {
 
-	public Map<Integer, Pair<OutgoingConnection, IncomingConnection> > connectedNodes;
-	public Map<String, FileNodeState> files;
-	public Map<String, Queue<String>> operations;
+	public static Map<Integer, Pair<OutgoingConnection, IncomingConnection> > connectedNodes;
+	public static Map<String, FileNodeState> files;
+	public static Map<String, Queue<String>> operations;
 	
 	private static List<String> ips;
-	public int N;
+	public static int N;
 	
 
-	private static createConnection(int other) {
+	private static void createConnection(int other) {
 		String ip = ips[other-1];
 		int port = N*100+other;
 		OutgoingConnection out;
@@ -37,7 +37,7 @@ public class Node {
 		connectedNodes.put(N, Pair.create(out, in));
 	}
 	
-	public void actOn(String filename){
+	public static void actOn(String filename){
 		String op = operations.get(filename).poll();
 		if(!op) return;
 
