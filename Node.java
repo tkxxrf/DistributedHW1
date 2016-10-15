@@ -140,9 +140,19 @@ public class Node {
 			} else if (line.startsWith("delete")) {
 				String[] parts = line.split(" ");
 				String fileName = parts[1];
+				FileNodeState state = files.get(fileName);
 				if (files.get(fileName) != null) {
-					operations.get(fileName).add("delete");
-					actOn(fileName, "");
+					operations.get(fileName).add(line);
+					if(state.holder == N && state.requests.isEmpty()){
+						actOn(fileName, "");
+						state.asked = false;
+					}else{
+						state.requests.add(N);
+						if(state.asked == false){
+							connectedNodes.get(state.holder).first.send("REQUEST " + fileName);
+							state.asked = true;
+						}
+					}
 				} else {
 					System.out.println("Error: No File Named: " + fileName);
 					continue;
@@ -150,14 +160,19 @@ public class Node {
 			} else if (line.startsWith("read")) {
 				String[] parts = line.split(" ");
 				String fileName = parts[1];
+				FileNodeState state = files.get(fileName);
 				if (files.get(fileName) != null) {
-					FileNodeState file = files.get(fileName);
-					int holder = file.holder;
-					if (holder != N) {
-						connectedNodes.get(holder).first.send("REQUEST " + fileName);
+					operations.get(fileName).add(line);
+					if(state.holder == N && state.requests.isEmpty()){
+						actOn(fileName, state.file);
+						state.asked = false;
+					}else{
+						state.requests.add(N);
+						if(state.asked == false){
+							connectedNodes.get(state.holder).first.send("REQUEST " + fileName);
+							state.asked = true;
+						}
 					}
-					operations.get(fileName).add("read");
-					actOn(fileName, files.get(fileName).file);
 				} else {
 					System.out.println("Error: No File Named: " + fileName);
 					continue;
@@ -165,23 +180,20 @@ public class Node {
 			} else if (line.startsWith("append")) {
 				String[] parts = line.split(" ");
 				String fileName = parts[1];
+				FileNodeState state = files.get(fileName);
+
 				if (files.get(fileName) != null) {
-					FileNodeState file = files.get(fileName);
-					int holder = file.holder;
-					if (holder != N) {
-						connectedNodes.get(holder).first.send("REQUEST " + fileName);
-					}
-					StringBuilder builder = new StringBuilder();
-					for(int i = 2; i < parts.length; ++i){
-						builder.append(parts[i]);
-						if(i < parts.length-1){
-							builder.append(" ");
+					operations.get(fileName).add(line);
+					if(state.holder == N && state.requests.isEmpty()){
+						actOn(fileName, state.file);
+						state.asked = false;
+					}else{
+						state.requests.add(N);
+						if(state.asked == false){
+							connectedNodes.get(state.holder).first.send("REQUEST " + fileName);
+							state.asked = true;
 						}
 					}
-					String file1 = builder.toString();
-					System.out.println("appending: " + file1 + " to file " + fileName);
-					operations.get(fileName).add("append " + fileName + " " + file1 + "\n");
-					actOn(fileName, files.get(fileName).file);
 				} else {
 					System.out.println("Error: No File Named: " + fileName);
 					continue;
