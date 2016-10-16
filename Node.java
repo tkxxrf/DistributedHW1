@@ -143,9 +143,12 @@ public class Node {
 				String fileName = parts[1];
 				FileNodeState state = files.get(fileName);
 				if (files.get(fileName) != null) {
+					synchronized(state){
 					operations.get(fileName).add(line);
 					if(state.holder == N && state.requests.isEmpty()){
+						state.using = true;
 						actOn(fileName, "");
+						state.using = false;
 						state.asked = false;
 					}else{
 						state.requests.add(N);
@@ -153,6 +156,7 @@ public class Node {
 							connectedNodes.get(state.holder).first.send("REQUEST " + fileName);
 							state.asked = true;
 						}
+					}
 					}
 				} else {
 					System.out.println("Error: No File Named: " + fileName);
@@ -163,9 +167,36 @@ public class Node {
 				String fileName = parts[1];
 				FileNodeState state = files.get(fileName);
 				if (state != null) {
+					synchronized(state){
 					operations.get(fileName).add(line);
 					if(state.holder == N && state.requests.isEmpty()){
+						state.using = true;
 						actOn(fileName, state.file);
+						state.using = false;
+						state.asked = false;
+					}else{
+						state.requests.add(N);
+						if(state.asked == false){
+							connectedNodes.get(state.holder).first.send("REQUEST " + fileName);
+							state.asked = true;
+						}
+					}
+					}
+				} else {
+					System.out.println("Error: No File Named: " + fileName);
+					continue;
+				}
+			} else if (line.startsWith("append")) {
+				String[] parts = line.split(" ");
+				String fileName = parts[1];
+				FileNodeState state = files.get(fileName);
+				synchronized(state){
+				if (state != null) {
+					operations.get(fileName).add(line);
+					if(state.holder == N && state.requests.isEmpty()){
+						state.using =true;
+						actOn(fileName, state.file);
+						state.using = false;
 						state.asked = false;
 					}else{
 						state.requests.add(N);
@@ -178,26 +209,6 @@ public class Node {
 					System.out.println("Error: No File Named: " + fileName);
 					continue;
 				}
-			} else if (line.startsWith("append")) {
-				String[] parts = line.split(" ");
-				String fileName = parts[1];
-				FileNodeState state = files.get(fileName);
-
-				if (state != null) {
-					operations.get(fileName).add(line);
-					if(state.holder == N && state.requests.isEmpty()){
-						actOn(fileName, state.file);
-						state.asked = false;
-					}else{
-						state.requests.add(N);
-						if(state.asked == false){
-							connectedNodes.get(state.holder).first.send("REQUEST " + fileName);
-							state.asked = true;
-						}
-					}
-				} else {
-					System.out.println("Error: No File Named: " + fileName);
-					continue;
 				}
 			} else if (line.equals("close")) {
 				System.out.println("Closing Program");

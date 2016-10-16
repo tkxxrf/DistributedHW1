@@ -74,7 +74,9 @@ public class IncomingConnection implements Runnable {
 							}
 						}
 					}
-					parent.files.put(message[1], state);
+					if(parent.files.containsKey(message[1]){
+						parent.files.put(message[1], state);
+					}
 						System.out.println(state);
 				}else if(message[0].equals("CREATE")){
 					System.out.println("recieved " + message[0] + " " + message[1] + " on " + incoming.getLocalPort());
