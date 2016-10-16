@@ -33,25 +33,26 @@ public class Node {
 
 	private void createConnection(int other) {
 		String ip = ips.get(other-1);
-		int port = N*100+other;
+		int port = (N*100+other)*20;
 		OutgoingConnection out = null;
 		IncomingConnection in = null;
 		try {
+
 			out = new OutgoingConnection(ip, port);
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
-		int incomingport = other*100+N;
+		int incomingport = (other*100+N)*20;
 		try {
 			in = new IncomingConnection(incomingport, this, other);
 			(new Thread(in)).start();
 		} catch(IOException e) {
 		   e.printStackTrace();
 		} 
-		connectedNodes.put(N, Pair.create(out, in));
+		connectedNodes.put(other, Pair.create(out, in));
 	}
 	
-	public void actOn(String filename, String file){
+	public synchronized void actOn(String filename, String file){
 		String op = operations.get(filename).poll();
 		if(op == null) return;
 
@@ -111,7 +112,7 @@ public class Node {
 	   
 	public void start() throws IOException {
 		Scanner sc = new Scanner(System.in);
-		
+		readTree("tree.txt", "ips.txt");	
 		while (true) {
 			System.out.println("Please Enter a Command");
 			String line = sc.nextLine();
@@ -161,7 +162,7 @@ public class Node {
 				String[] parts = line.split(" ");
 				String fileName = parts[1];
 				FileNodeState state = files.get(fileName);
-				if (files.get(fileName) != null) {
+				if (state != null) {
 					operations.get(fileName).add(line);
 					if(state.holder == N && state.requests.isEmpty()){
 						actOn(fileName, state.file);
@@ -182,7 +183,7 @@ public class Node {
 				String fileName = parts[1];
 				FileNodeState state = files.get(fileName);
 
-				if (files.get(fileName) != null) {
+				if (state != null) {
 					operations.get(fileName).add(line);
 					if(state.holder == N && state.requests.isEmpty()){
 						actOn(fileName, state.file);

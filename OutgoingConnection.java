@@ -16,10 +16,9 @@ public class OutgoingConnection {
 		try {
 
 			Socket client = new Socket(server, port);
-			System.out.println("Just connected to " + client.getRemoteSocketAddress());
 			OutputStream outToServer = client.getOutputStream();
 			DataOutputStream out = new DataOutputStream(outToServer);
-
+			System.out.println("sending " + message + " to " + server + ":" + port);
 			out.writeUTF(message);
 			client.close();
 		} catch(IOException e) {

@@ -17,4 +17,8 @@ public class FileNodeState {
 		using = false;
 		file = "";
 	}
+
+	public String toString(){
+		return "File: " + filename + "\n\t asked = " + asked + "\n\t using = " + using + " \n\t holder = " + holder;
+	}
 }
