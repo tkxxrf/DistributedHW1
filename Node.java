@@ -32,6 +32,7 @@ public class Node {
 	}
 
 	private void createConnection(int other) {
+		System.out.println("Creating connection to " + other);
 		String ip = ips.get(other-1);
 		int port = (N*100+other)*20;
 		OutgoingConnection out = null;
