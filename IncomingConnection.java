@@ -7,13 +7,13 @@ import java.util.Map;
 import java.io.*;
 
 public class IncomingConnection implements Runnable {
-	private static ServerSocket incoming;
+	private ServerSocket incoming;
 	private Node parent;
 	private int connectedTo;
 
 	public IncomingConnection(int inport, Node parent, int to) throws IOException {
 		incoming = new ServerSocket(inport);
-
+		System.out.println("createed new incon to " + to + " on "+ inport + " " + incoming.getLocalPort());
 		this.parent = parent;
       	//serverSocket.setSoTimeout(10000);
 		this.connectedTo = to;
