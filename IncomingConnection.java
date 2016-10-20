@@ -74,7 +74,7 @@ public class IncomingConnection implements Runnable {
 							}
 						}
 					}
-					if(parent.files.containsKey(message[1]){
+					if(parent.files.containsKey(message[1])){
 						parent.files.put(message[1], state);
 					}
 						System.out.println(state);
